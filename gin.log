@@ -2,12 +2,27 @@
  - using env:	export GIN_MODE=release
  - using code:	gin.SetMode(gin.ReleaseMode)
 
-[GIN-debug] GET    /videos                   --> main.main.func1 (5 handlers)
-[GIN-debug] POST   /videos                   --> main.main.func2 (5 handlers)
+[GIN-debug] GET    /css/*filepath            --> github.com/gin-gonic/gin.(*RouterGroup).createStaticHandler.func1 (5 handlers)
+[GIN-debug] HEAD   /css/*filepath            --> github.com/gin-gonic/gin.(*RouterGroup).createStaticHandler.func1 (5 handlers)
+[GIN-debug] Loaded HTML Templates (4): 
+	- header.html
+	- index.html
+	- 
+	- footer.html
+
+[GIN-debug] GET    /api/videos               --> main.main.func1 (5 handlers)
+[GIN-debug] POST   /api/videos               --> main.main.func2 (5 handlers)
+[GIN-debug] GET    /view/videos              --> gitlab.com/pragmaticreviews/golang-gin-poc/controller.VideoController.ShowAll-fm (5 handlers)
 [GIN-debug] [WARNING] You trusted all proxies, this is NOT safe. We recommend you to set a value.
 Please check https://pkg.go.dev/github.com/gin-gonic/gin#readme-don-t-trust-all-proxies for details.
-[GIN-debug] Listening and serving HTTP on :8080
-::1 - [18 Jul 23 14:29 -03] POST /videos 400 12.8917ms 
-::1 - [18 Jul 23 14:29 -03] POST /videos 200 18.0389ms 
-::1 - [18 Jul 23 14:29 -03] POST /videos 400 8.3962ms 
-::1 - [18 Jul 23 14:29 -03] GET /videos 200 7.0114ms 
+[GIN-debug] Listening and serving HTTP on localhost:8080
+127.0.0.1 - [18 Jul 23 15:12 -03] POST /api/videos 200 6.9488ms 
+127.0.0.1 - [18 Jul 23 15:12 -03] POST /api/videos 200 8.6492ms 
+127.0.0.1 - [18 Jul 23 15:12 -03] POST /api/videos 200 18.7759ms 
+127.0.0.1 - [18 Jul 23 15:12 -03] GET /api/videos 200 12.0568ms 
+127.0.0.1 - [18 Jul 23 15:14 -03] GET /view/videos 401 0s 
+127.0.0.1 - [18 Jul 23 15:14 -03] GET /view/videos 200 7.4175ms 
+127.0.0.1 - [18 Jul 23 15:14 -03] GET /css/index.css 401 0s 
+127.0.0.1 - [18 Jul 23 15:14 -03] GET /css/index.css 200 170.8755ms 
+127.0.0.1 - [18 Jul 23 15:14 -03] GET /favicon.ico 401 0s 
+127.0.0.1 - [18 Jul 23 15:14 -03] GET /favicon.ico 404 9.1182ms 
