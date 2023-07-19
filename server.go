@@ -56,5 +56,11 @@ func main() {
 		viewRoutes.GET("/videos", videoController.ShowAll)
 	}
 
-	server.Run("localhost:8080")
+	// We can setup this env variable from the EB console
+	port := os.Getenv("PORT")
+	// Elastic Beanstalk forwards requests to port 5000
+	if port == "" {
+		port = "5000"
+	}
+	server.Run(":" + port)
 }
