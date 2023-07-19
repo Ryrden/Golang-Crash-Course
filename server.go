@@ -8,13 +8,15 @@ import (
 	"github.com/gin-gonic/gin"
 	"gitlab.com/pragmaticreviews/golang-gin-poc/controller"
 	"gitlab.com/pragmaticreviews/golang-gin-poc/middleware"
+	"gitlab.com/pragmaticreviews/golang-gin-poc/repository"
 	"gitlab.com/pragmaticreviews/golang-gin-poc/service"
 )
 
 var (
-	videoService service.VideoService = service.New()
-	loginService service.LoginService = service.NewLoginService()
-	jwtService   service.JWTService   = service.NewJWTService()
+	videoRepository repository.VideoRepository = repository.NewVideoRepository()
+	videoService    service.VideoService       = service.New(videoRepository)
+	loginService    service.LoginService       = service.NewLoginService()
+	jwtService      service.JWTService         = service.NewJWTService()
 
 	videoController controller.VideoController = controller.New(videoService)
 	loginController controller.LoginController = controller.NewLoginController(loginService, jwtService)
@@ -26,12 +28,15 @@ func setupLogOutput() {
 }
 
 func main() {
+	defer videoRepository.CloseDB()
 
-	setupLogOutput()
+	//setupLogOutput()
 
 	server := gin.New()
 
-	server.Use(gin.Recovery(), middleware.Logger())
+	server.Use(gin.Recovery(), gin.Logger())
+
+	//server.Use(middleware.Logger(), gindump.Dump())
 
 	server.Static("/css", "./templates/css")
 
@@ -49,7 +54,7 @@ func main() {
 		}
 	})
 
-	// Basic Authorization Middleware applies to "/api" only.
+	// JWT Authorization Middleware applies to "/api" only.
 	apiRoutes := server.Group("/api", middleware.AuthorizeJWT())
 	{
 		apiRoutes.GET("/videos", func(ctx *gin.Context) {
@@ -61,10 +66,31 @@ func main() {
 			if err != nil {
 				ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			} else {
-				ctx.JSON(http.StatusOK, gin.H{"message": "Video Input is Valid!!"})
+				ctx.JSON(http.StatusOK, gin.H{"message": "Success!"})
 			}
 
 		})
+
+		apiRoutes.PUT("/videos/:id", func(ctx *gin.Context) {
+			err := videoController.Update(ctx)
+			if err != nil {
+				ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			} else {
+				ctx.JSON(http.StatusOK, gin.H{"message": "Success!"})
+			}
+
+		})
+
+		apiRoutes.DELETE("/videos/:id", func(ctx *gin.Context) {
+			err := videoController.Delete(ctx)
+			if err != nil {
+				ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			} else {
+				ctx.JSON(http.StatusOK, gin.H{"message": "Success!"})
+			}
+
+		})
+
 	}
 
 	// The "/view" endpoints are public (no Authorization required)

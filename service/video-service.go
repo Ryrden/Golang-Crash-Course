@@ -1,27 +1,42 @@
 package service
 
-import "gitlab.com/pragmaticreviews/golang-gin-poc/entity"
+import (
+	"gitlab.com/pragmaticreviews/golang-gin-poc/entity"
+	"gitlab.com/pragmaticreviews/golang-gin-poc/repository"
+)
 
 type VideoService interface {
-	Save(entity.Video) entity.Video
+	Save(entity.Video) error
+	Update(entity.Video) error
+	Delete(entity.Video) error
 	FindAll() []entity.Video
 }
 
 type videoService struct {
-	videos []entity.Video
+	repository repository.VideoRepository
 }
 
-func New() VideoService {
+func New(videoRepository repository.VideoRepository) VideoService {
 	return &videoService{
-		videos: []entity.Video{},
+		repository: videoRepository,
 	}
 }
 
-func (service *videoService) Save(video entity.Video) entity.Video {
-	service.videos = append(service.videos, video)
-	return video
+func (service *videoService) Save(video entity.Video) error {
+	service.repository.Save(video)
+	return nil
+}
+
+func (service *videoService) Update(video entity.Video) error {
+	service.repository.Update(video)
+	return nil
+}
+
+func (service *videoService) Delete(video entity.Video) error {
+	service.repository.Delete(video)
+	return nil
 }
 
 func (service *videoService) FindAll() []entity.Video {
-	return service.videos
+	return service.repository.FindAll()
 }
