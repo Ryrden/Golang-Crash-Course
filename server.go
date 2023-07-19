@@ -6,7 +6,6 @@ import (
 	"os"
 
 	"github.com/gin-gonic/gin"
-	gindump "github.com/tpkeeper/gin-dump"
 	"gitlab.com/pragmaticreviews/golang-gin-poc/controller"
 	"gitlab.com/pragmaticreviews/golang-gin-poc/middleware"
 	"gitlab.com/pragmaticreviews/golang-gin-poc/service"
@@ -18,7 +17,7 @@ var (
 )
 
 func setupLogOutput() {
-	f, _ := os.Create("gin.log")
+	f, _ := os.Create("/var/log/golang/gin-app.log")
 	gin.DefaultWriter = io.MultiWriter(f, os.Stdout)
 }
 
@@ -28,13 +27,14 @@ func main() {
 
 	server := gin.New()
 
-	server.Use(gin.Recovery(), middleware.Logger(), middleware.BasicAuth(), gindump.Dump())
+	server.Use(gin.Recovery(), middleware.Logger())
 
 	server.Static("/css", "./templates/css")
 
 	server.LoadHTMLGlob("templates/*.html")
 
-	apiRoutes := server.Group("/api")
+	// Basic Authorization Middleware applies to "/api" only.
+	apiRoutes := server.Group("/api", middleware.BasicAuth())
 	{
 		apiRoutes.GET("/videos", func(ctx *gin.Context) {
 			ctx.JSON(200, videoController.FindAll())
@@ -51,6 +51,7 @@ func main() {
 		})
 	}
 
+	// The "/view" endpoints are public (no Authorization required)
 	viewRoutes := server.Group("/view")
 	{
 		viewRoutes.GET("/videos", videoController.ShowAll)
