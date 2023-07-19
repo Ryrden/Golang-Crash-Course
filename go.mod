@@ -3,6 +3,7 @@ module gitlab.com/pragmaticreviews/golang-gin-poc
 go 1.20
 
 require (
+	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/gin-gonic/gin v1.9.1
 	github.com/stretchr/testify v1.8.4
 	gopkg.in/go-playground/validator.v9 v9.31.0
