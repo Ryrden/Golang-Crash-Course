@@ -23,3 +23,7 @@ go.work
 .elasticbeanstalk/*
 !.elasticbeanstalk/*.cfg.yml
 !.elasticbeanstalk/*.global.yml
+
+
+# Sqlite3
+*.db
