@@ -1,37 +1,89 @@
 package service
 
 import (
-	"testing"
-
-	"github.com/stretchr/testify/assert"
+	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/gomega"
 	"gitlab.com/pragmaticreviews/golang-gin-poc/entity"
-	videoService "gitlab.com/pragmaticreviews/golang-gin-poc/service"
+	"gitlab.com/pragmaticreviews/golang-gin-poc/service"
+	"gitlab.com/pragmaticreviews/golang-gin-poc/repository"
 )
 
 const (
 	TITLE       = "Video Title"
 	DESCRIPTION = "Video Description"
 	URL         = "https://youtu.be/JgW-i2QjgHQ"
+	FIRSTNAME   = "John"
+	LASTNAME    = "Doe"
+	EMAIL       = "jdoe@mail.com"
 )
 
-func getVideo() entity.Video {
-	return entity.Video{
-		Title:       TITLE,
-		Description: DESCRIPTION,
-		URL:         URL,
-	}
+var testVideo entity.Video = entity.Video{
+	Title:       TITLE,
+	Description: DESCRIPTION,
+	URL:         URL,
+	Author: entity.Person{
+		FirstName: FIRSTNAME,
+		LastName:  LASTNAME,
+		Email:     EMAIL,
+	},
 }
 
-func TestFindAll(t *testing.T) {
-	service := videoService.New()
+var _ = Describe("Video Service", func() {
 
-	service.Save(getVideo())
+	var (
+		videoRepository repository.VideoRepository
+		videoService    service.VideoService
+	)
 
-	videos := service.FindAll()
+	BeforeSuite(func() {
+		videoRepository = repository.NewVideoRepository()
+		videoService = service.New(videoRepository)
+	})
 
-	firstVideo := videos[0]
-	assert.NotNil(t, videos)
-	assert.Equal(t, TITLE, firstVideo.Title)
-	assert.Equal(t, DESCRIPTION, firstVideo.Description)
-	assert.Equal(t, URL, firstVideo.URL)
-}
+	Describe("Fetching all existing videos", func() {
+
+		Context("If there is a video in the database", func() {
+
+			BeforeEach(func() {
+				videoService.Save(testVideo)
+			})
+
+			It("should return at least one element", func() {
+				videoList := videoService.FindAll()
+
+				Ω(videoList).ShouldNot(BeEmpty())
+			})
+
+			It("should map the fields correctly", func() {
+				firstVideo := videoService.FindAll()[0]
+
+				Ω(firstVideo.Title).Should(Equal(TITLE))
+				Ω(firstVideo.Description).Should(Equal(DESCRIPTION))
+				Ω(firstVideo.URL).Should(Equal(URL))
+				Ω(firstVideo.Author.FirstName).Should(Equal(FIRSTNAME))
+				Ω(firstVideo.Author.LastName).Should(Equal(LASTNAME))
+				Ω(firstVideo.Author.Email).Should(Equal(EMAIL))
+			})
+
+			AfterEach(func() {
+				video := videoService.FindAll()[0]
+				videoService.Delete(video)
+			})
+
+		})
+
+		Context("If there are no videos in the database", func() {
+
+			It("should return an empty list", func() {
+				videos := videoService.FindAll()
+
+				Ω(videos).Should(BeEmpty())
+			})
+
+		})
+	})
+
+	AfterSuite(func() {
+		videoRepository.CloseDB()
+	})
+})
